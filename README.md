@@ -4,7 +4,7 @@
 
 Framework
 
-**Full figure (paper):** [66.pdf](66.pdf) — Markdown cannot embed PDFs; use the link to open the framework figure. To show the paper figure above, export the PDF page as PNG and save as `assets/framework.png`.
+**Full figure (paper):** [framework.pdf](framework.pdf) — Markdown cannot embed PDFs; use the link to open the framework figure. To show the paper figure above, export the PDF page as PNG and save as `assets/framework.png`.
 
 ## Overview
 
