@@ -1,10 +1,21 @@
-# Bridging Heterogeneous Medical Datasets via Mixture-of-Specialists Adapters for Generalist Medical Image Classification
+<div align="center">
+
+# Bridging Heterogeneous Medical Datasets via Mixture-of-Specialists Adapters
+
+[![Paper](https://img.shields.io/badge/Paper-MICCAI_2026-blue.svg)](#)
+[![Code License](https://img.shields.io/badge/License-Apache_2.0-green.svg)](LICENSE)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-ee4c2c.svg)](https://pytorch.org/)
+
+**Official PyTorch implementation for unifying 2D and 3D medical imaging tasks via structural disentanglement.**
+
+[Overview](#overview) • [Architecture](#architecture) • [Installation](#installation) • [Usage](#training) 
+
+</div>
+
+---
 
 > **MOSAIC** (Mixture-of-Specialists Adapter for Imaging Classification): a parameter-efficient framework that unifies 18 MedMNIST datasets spanning 6 imaging modalities using a frozen ViT backbone.
-
-Framework
-
-**Full figure (paper):** [framework.pdf](framework.pdf) — Markdown cannot embed PDFs; use the link to open the framework figure. To show the paper figure above, export the PDF page as PNG and save as `assets/framework.png`.
 
 ## Overview
 
@@ -12,17 +23,18 @@ Medical imaging data is inherently fragmented across modalities (pathology, radi
 
 MOSAIC addresses this via a **Mixture-of-Specialists (MoS)** mechanism with explicit hard routing, which structurally disentangles texture-oriented, shape-oriented, and volumetric feature subspaces within a frozen ViT backbone. Combined with cyclic training and an expert-aware EMA teacher, MOSAIC achieves **84.16% average accuracy** across 18 datasets, matching or exceeding single-task specialists with only **7.9% trainable parameters** (7.40M / 93M).
 
+![MOSAIC Framework](assets/framework.png)
+*(If the image does not load, please refer to the [framework.pdf](framework.pdf) included in this repository.)*
+
 ## Architecture
 
-Architecture (aligned)
-
-```
+```text
 Input (2D / 3D)
       │
       ▼
 ┌──────────────┐
-│Modality_Aware│   2D: Conv2d  (224×224 → 196 tokens)
-│  Tokenizer   │   3D: Conv3d  (64³    → 512 tokens)
+│Modality-Aware│   2D: Conv2d  (224×224 → 196 tokens)
+│  Tokenizer   │   3D: Conv3d  (64³     → 512 tokens)
 └──────┬───────┘
        ▼
 ┌──────────────┐
@@ -42,9 +54,8 @@ Input (2D / 3D)
 ```
 
 ## Installation
-
 ```bash
-git clone https://github.com/xxx/mosaic-medical.git
+git clone [https://github.com/xxx/mosaic-medical.git](https://github.com/xxx/mosaic-medical.git)
 cd mosaic-medical
 pip install -r requirements.txt
 ```
@@ -62,11 +73,11 @@ pip install medmnist
 Download ViT-B/16 ImageNet-21k weights:
 
 ```bash
-wget https://storage.googleapis.com/vit_models/imagenet21k/ViT-B_16.npz -O vit_base_patch16_224.npz
+wget [https://storage.googleapis.com/vit_models/imagenet21k/ViT-B_16.npz](https://storage.googleapis.com/vit_models/imagenet21k/ViT-B_16.npz) -O vit_base_patch16_224.npz
 ```
 
 ## Training
-
+To train the unified MOSAIC model across all 18 datasets:
 ```bash
 python main.py \
     --data_root ./data \
@@ -87,7 +98,7 @@ python main.py \
 ```
 
 ## Evaluation
-
+To evaluate a trained checkpoint on all tasks:
 ```bash
 python testing.py \
     --checkpoint ./output/best_model.pth \
@@ -96,7 +107,7 @@ python testing.py \
 ```
 
 ## Specialist Routing
-
+MOSAIC automatically routes diverse modalities to corresponding specialists based on intrinsic dimensionality:
 
 | Specialist | Modality              | Bottleneck | Datasets                                                                                    |
 | ---------- | --------------------- | ---------- | ------------------------------------------------------------------------------------------- |
