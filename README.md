@@ -9,19 +9,19 @@
 
 </div>
 
-## TL;DR
+## Overview
 
-**MOSAIC** trains only **7.40M parameters (7.9%)** on a frozen ViT-B/16 and achieves **84.16% average accuracy** across 18 MedMNIST datasets (6 modalities, 2D+3D) — matching or exceeding 18 single-task specialists that collectively require 16× more storage.
+Generalist medical AI promises accessible screening across diverse imaging modalities, but is hindered by the inherent heterogeneity of medical data. Simply mixing 2D and 3D datasets leads to **negative transfer** — texture-biased (pathology) and shape-biased (radiology) features interfere with each other, dropping joint training below single-task baselines (77.66% vs 81.86%).
+
+**MOSAIC** (Mixture-of-Specialists Adapter for Imaging Classification) resolves this via explicit hard routing to structurally isolated specialist adapters within a frozen ViT backbone. No learnable gating, no mode collapse — just three specialists handling three feature families. The result: **84.16% average accuracy** across 18 MedMNIST datasets (6 modalities), matching or exceeding single-task specialists with only **7.9% trainable parameters** (7.40M / 93M). External validation on unseen 2D and 3D domains further confirms its generalization capability.
 
 <p align="center">
   <img src="framework.png" width="95%">
 </p>
 
-## Why This Matters
+## Specialist Routing
 
-Naïvely mixing heterogeneous medical data (pathology + radiology + CT + 3D volumes) causes negative transfer — texture-biased and shape-biased features interfere with each other, and joint training actually *underperforms* single-task baselines (77.66% vs 81.86%).
-
-MOSAIC fixes this with a dead-simple idea: **hard-route each input to a structurally isolated specialist adapter**. No learnable gating, no mode collapse. Three specialists handle three feature families:
+Three specialists handle three feature families with asymmetric capacity reflecting intrinsic dimensionality:
 
 | | Domain | Bottleneck | Datasets |
 |:---:|:---|:---:|:---|
@@ -29,18 +29,17 @@ MOSAIC fixes this with a dead-simple idea: **hard-route each input to a structur
 | **B** | Radiology (Grayscale) | 96 | ChestMNIST, PneumoniaMNIST, BreastMNIST, OCTMNIST, OrganA/C/SMNIST |
 | **C** | Volumetric (3D) | 192 | OrganMNIST3D, NoduleMNIST3D, AdrenalMNIST3D, VesselMNIST3D, FractureMNIST3D, SynapseMNIST3D |
 
-The asymmetric capacity (64 → 96 → 192) reflects intrinsic dimensionality: 2D texture/shape patterns are more redundant; 3D volumes need more capacity for spatial dependencies.
-
 ## Quick Start
 
 ```bash
-# 1. Clone & install
+# 1. Install
 pip install -r requirements.txt
 
 # 2. Download ViT-B/16 backbone (ImageNet-21k)
 wget https://storage.googleapis.com/vit_models/imagenet21k/ViT-B_16.npz -O vit_base_patch16_224.npz
 
 # 3. Train (MedMNIST datasets download automatically)
+#    The best checkpoint is automatically evaluated at the end of training.
 python main.py \
     --data_root ./data \
     --pretrained ./vit_base_patch16_224.npz \
@@ -58,7 +57,7 @@ python main.py \
     --early_stopping_patience 5 \
     --seed 42
 
-# 4. Evaluate
+# 4. (Optional) Manually evaluate a specific checkpoint
 python testing.py \
     --checkpoint ./output/best_model.pth \
     --data_root ./data \
